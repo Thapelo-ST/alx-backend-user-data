@@ -23,11 +23,17 @@ class RedactingFormatter(logging.Formatter):
     FORMAT = "[HOLBERTON] %(name)s %(levelname)s %(asctime)-15s: %(message)s"
     SEPARATOR = ";"
 
+    """ intializes the class"""
+
     def __init__(self, fields: list):
+        """ intializes the class"""
         super(RedactingFormatter, self).__init__(self.FORMAT)
         self.fields = fields
 
+    """formats the passed record"""
+
     def format(self, record: logging.LogRecord) -> str:
+        """formats the passed record"""
         record.msg = filter_datum(self.fields, self.REDACTION, record.msg,
                                   self.SEPARATOR)
         return super().format(record)
@@ -43,6 +49,9 @@ def filter_datum(fields: List[str], redaction: str, message: str,
     """returns the log message obfuscated"""
     p = fr'(\b|{re.escape(separator)})({"|".join(map(re.escape, fields))})=([^;]+)'
     return re.sub(p, lambda match: f'{match.group(1)}{match.group(2)}={redaction}', message)
+
+
+"""Return a configured logger"""
 
 
 def get_logger() -> logging.Logger:
