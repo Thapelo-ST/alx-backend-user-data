@@ -34,11 +34,11 @@ class Auth():
     def current_user(self, request=None) -> TypeVar('User'):  # type: ignore
         """ returns current user"""
         return None
-    
+
     def session_cookie(self, request=None):
         """ returns a coockie value from a request """
         if request is None:
             return None
-        
+
         cookie_name = os.environ.get("SESSION_NAME", "_my_session_id")
         return request.cookies.get(cookie_name)
