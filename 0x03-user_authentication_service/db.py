@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """DB module
 """
-import logging
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -34,36 +33,42 @@ class DB:
 
     def add_user(self, email: str, hashed_password: str) -> User:
         """adds a user to the database"""
-        new_user = User(email=email, hashed_password=hashed_password)
+        new_user = User(email=email, password=hashed_password)
         self._session.add(new_user)
         self._session.commit()
         return new_user
 
-    def find_user_by(self, **kwargs) -> User or None:
-        """Finds a user by their email address in the database"""
-        try:
-            query = self._session.query(User).filter_by(**kwargs)
-            result = query.one()
-            return result
-        except NoResultFound:
-            raise NoResultFound
-        except InvalidRequestError as e:
-            raise InvalidRequestError from e
+    def find_user_by(self, **kwargs) -> User:
+        """ find user function """
+        users = self._session.query(User)
 
+        for key, value in kwargs.items():
+            if key not in User.__dict__:
+                raise InvalidRequestError
+
+            found_user = None
+            for user in users:
+                if getattr(user, key) == value:
+                    if found_user is not None:
+                        raise InvalidRequestError
+                    found_user = user
+
+            if found_user is not None:
+                return found_user
+            
     def update_user(self, user_id: int, **kwargs) -> None:
         """Updates a user's attributes in the database"""
         try:
             user = self.find_user_by(id=user_id)
-
             for key, value in kwargs.items():
                 if hasattr(user, key):
                     setattr(user, key, value)
                 else:
-                    raise ValueError(f"Invalid attribute: {key}")
+                    raise ValueError("Invalid attribute: {}".format(key))
 
             self._session.commit()
 
         except NoResultFound:
-            raise NoResultFound(f"No user found with id {user_id}")
+            raise NoResultFound("No user found with id {}".format(user_id))
         except InvalidRequestError:
             raise InvalidRequestError("Invalid query arguments")
