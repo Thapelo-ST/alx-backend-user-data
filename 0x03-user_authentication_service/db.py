@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """DB module
 """
+import logging
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -46,9 +47,23 @@ class DB:
             return result
         except NoResultFound:
             raise NoResultFound
-        except InvalidRequestError:
-            raise InvalidRequestError
+        except InvalidRequestError as e:
+            raise InvalidRequestError from e
 
-    def get_users(self):
-        """Return all users from the database as a list of User objects"""
-        return self._session.query(User).order_by(User.id).all()
+    def update_user(self, user_id: int, **kwargs) -> None:
+        """Updates a user's attributes in the database"""
+        try:
+            user = self.find_user_by(id=user_id)
+
+            for key, value in kwargs.items():
+                if hasattr(user, key):
+                    setattr(user, key, value)
+                else:
+                    raise ValueError(f"Invalid attribute: {key}")
+
+            self._session.commit()
+
+        except NoResultFound:
+            raise NoResultFound(f"No user found with id {user_id}")
+        except InvalidRequestError:
+            raise InvalidRequestError("Invalid query arguments")
