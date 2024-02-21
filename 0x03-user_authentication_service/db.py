@@ -33,7 +33,7 @@ class DB:
 
     def add_user(self, email: str, hashed_password: str) -> User:
         """adds a user to the database"""
-        new_user = User(email=email, password=hashed_password)
+        new_user = User(email=email, hashed_password=hashed_password)
         self._session.add(new_user)
         self._session.commit()
         return new_user
@@ -45,17 +45,16 @@ class DB:
         for key, value in kwargs.items():
             if key not in User.__dict__:
                 raise InvalidRequestError
-
             found_user = None
             for user in users:
                 if getattr(user, key) == value:
                     if found_user is not None:
                         raise InvalidRequestError
                     found_user = user
-
             if found_user is not None:
                 return found_user
-            
+        raise NoResultFound
+
     def update_user(self, user_id: int, **kwargs) -> None:
         """Updates a user's attributes in the database"""
         try:
@@ -65,7 +64,6 @@ class DB:
                     setattr(user, key, value)
                 else:
                     raise ValueError("Invalid attribute: {}".format(key))
-
             self._session.commit()
 
         except NoResultFound:
