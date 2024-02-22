@@ -9,8 +9,9 @@ app = Flask(__name__)
 AUTH = Auth()
 
 
-@app.route('/')
-def function1() -> jsonify:
+@app.route('/', methods=['GET'])
+def home() -> jsonify:
+    """Home page."""
     return jsonify({"message": "Bienvenue"})
 
 
