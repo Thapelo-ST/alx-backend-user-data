@@ -41,8 +41,8 @@ class DB:
     def find_user_by(self, **kwargs) -> User:
         """ find user function """
         users = self._session.query(User)
-
-        for key, value in kwargs.items():
+        found_user = None
+        """for key, value in kwargs.items():
             if key not in User.__dict__:
                 raise InvalidRequestError
             found_user = None
@@ -53,6 +53,19 @@ class DB:
                     found_user = user
             if found_user is not None:
                 return found_user
+        raise NoResultFound"""
+        for key, value in kwargs.items():
+            if key not in User.__dict__:
+                raise InvalidRequestError
+            for user in users:
+                if getattr(user, key) == value:
+                    if found_user is not None:
+                        raise InvalidRequestError
+                    found_user = user
+
+        if found_user is not None:
+            return found_user
+
         raise NoResultFound
 
     def update_user(self, user_id: int, **kwargs) -> None:
