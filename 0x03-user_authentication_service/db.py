@@ -46,7 +46,6 @@ class DB:
             new_user = None
         return new_user
 
-
     def find_user_by(self, **kwargs) -> User:
         """ find user function """
         users = self._session.query(User)
