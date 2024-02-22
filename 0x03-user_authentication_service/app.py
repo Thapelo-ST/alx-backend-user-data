@@ -5,11 +5,12 @@ flask app
 from flask import Flask, jsonify, request
 from auth import Auth
 
+
 app = Flask(__name__)
 AUTH = Auth()
 
 
-@app.route('/', methods=['GET'])
+@app.route('/', methods=['GET'], strict_slashes=False)
 def home() -> jsonify:
     """Home page."""
     return jsonify({"message": "Bienvenue"})
